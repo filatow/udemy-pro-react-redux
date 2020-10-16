@@ -3,9 +3,9 @@ import React, {Component} from 'react';
 import './todo-list-item.css';
 
 export default class TodoListItem extends Component {
-  constructor(props) {
-    super();
-  }
+  // constructor() {
+  //   super();
+  // }
 
   render() {
     const { label,

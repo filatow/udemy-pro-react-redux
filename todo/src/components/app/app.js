@@ -29,7 +29,9 @@ export default class App extends Component {
         this.createTodoItem('Drink Coffee'),
         this.createTodoItem('Make App'),
         this.createTodoItem('Have a lunch'),
-      ]
+      ],
+      searchRequest: '',
+      filter: 'all', // active, all, done
     };
 
     this.deleteItem = (id) => {
@@ -80,25 +82,88 @@ export default class App extends Component {
         return this.toggleProperty(todoData, id, 'done')
       })
     };
+
+    this.onFilterChange = (filter) => {
+      if (filter !== this.state.filter) {
+        this.setState({
+          filter
+        });
+      }
+    };
+
+    this.onSearchChange = (term) => {
+      this.setState({
+        searchRequest: term
+      });
+    };
   }
 
+  search(items, term) {
+    if (items.length === 0) {
+      return items;
+    };
+    return items.filter((item) => {
+      return (item.label.toLowerCase()
+              .indexOf(term.toLowerCase()) > -1);
+    });
+  };
   
+  filter(items, filter) {
+    switch (filter) {
+      case 'all':
+        return items;
+      case 'active':
+        return items.filter((item) => !item.done);
+      case 'done':
+        return items.filter((item) => item.done);
+      default:
+        return items;
+    }
+
+  }
 
   render() {
-    const {todoData} = this.state;
+    const {todoData, filter, searchRequest} = this.state;
     const doneCount = todoData.filter((item) => item.done).length;
     const todoCount = todoData.length - doneCount;
+    // let todos;
+
+    const visibleItems = this.filter(
+      this.search(todoData, searchRequest),filter); 
+
+    // switch (filter) {
+    //   case 'Done':
+    //     todos = todoData.filter((elem) => elem.done);
+    //     break;
+    //   case 'Active':
+    //     todos = todoData.filter((elem) => !elem.done);
+    //     break;
+    //   default:
+    //     todos = [...todoData];
+    //     break;
+    // };
+
+    // if (searchRequest) {
+    //   todos = todos.filter((elem) => {
+    //     return elem.label.toLowerCase().startsWith(searchRequest.toLowerCase());
+    //   })
+    // };
 
     return (
       <div className = "todo-app">
-        <AppHeader toDo={todoCount} done={doneCount} />
+        <AppHeader
+          toDo = {todoCount}
+          done = {doneCount} />
         <div className = "top-panel d-flex">
-          <SearchPanel />
-          <ItemStatusFilter />
+          <SearchPanel
+            onSearchChange = {this.onSearchChange} />
+          <ItemStatusFilter
+            filter = {filter}
+            onFilterChange = {this.onFilterChange} />
         </div>
   
         <TodoList 
-          todos = {todoData}
+          todos = {visibleItems}
           onDeleted = {this.deleteItem}
           onToggleImportant = {this.onToggleImportant}
           onToggleDone = {this.onToggleDone}
